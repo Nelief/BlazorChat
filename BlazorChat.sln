@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorChat", "BlazorChat2\BlazorChat.csproj", "{77F77897-0FAE-4283-B25F-2CD1F143D539}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorChat2", "BlazorChat2\BlazorChat2.csproj", "{77F77897-0FAE-4283-B25F-2CD1F143D539}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -69,8 +69,6 @@ app.UseAntiforgery();
 //app.MapBlazorHub();
 app.MapHub<ChatHub>("/chatroom");
 
-
-
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
