@@ -1,0 +1,137 @@
+﻿@page "/chat"
+@using Microsoft.AspNetCore.SignalR.Client
+@using BlazorChat2.Model
+@inject NavigationManager NavigationManager
+@implements IAsyncDisposable
+<PageTitle>ChatRoom</PageTitle>
+
+<div class="chat-container container overflow-auto shadow p-3 mb-2 bg-white rounded">
+    @if (!UserMessages.Any())
+    {
+        <p class="text-center fw-bold">No messages yet!</p>
+    }
+    else
+    {
+        foreach (var message in UserMessages)
+        {
+            if(message.IsCurrentUser){
+                <div class="row mb-3 d-flex justify-content-end">
+                    <div class="message-card card shadow px-0 me-4">
+                        <div class="card-header bg-dark bg-opacity-50 text-light">
+                            @message.Username
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush m-0">
+                                <li class="list-group-item">@message.Message</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-dark bg-opacity-50 text-light">
+                            <span class="small">@message.DateSent.ToString("HH:mm | MMM dd")</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="row mb-3 d-flex">
+                    <div class="message-card card shadow px-0 ms-4 ">
+                        <div class="card-header bg-dark text-light">
+                            @message.Username
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush m-0">
+                                <li class="list-group-item">@message.Message</li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-dark text-light">
+                            <span class="small">@message.DateSent.ToString("HH:mm | MMM dd")</span>
+                        </div>
+                    </div>
+                </div>
+            } 
+        }
+    }
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-3 text-black">
+                <InputText class="form-control" id="CurrentUsername" type="text" @bind-Value="CurrentUserName" placeholder="Your Username" readonly="@IsUserReadonly" />
+        </div>
+        <div class="col-6">
+            <textarea class="form-control" @bind="MessageInput" placeholder="..."></textarea>
+        </div>
+        <div class="col-3">
+            <button type="button" @onclick="Send" disabled="@(!isConnected)" class="btn btn-primary">Send</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .chat-container {
+        height: 700px;
+    }
+
+    .message-card {
+        width: 18rem;
+    }
+</style>
+
+
+@code {
+    private HubConnection connection;
+    private List<UserMessage> UserMessages = new();
+    private string CurrentUserName;
+    private string MessageInput;
+    private string MessageBody;
+    private bool IsUserReadonly = false;
+
+    public bool isConnected => connection.State == HubConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        //inizializzo la connessione alla hub
+        connection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/chatroom")).Build();
+
+        //definisce un evento che viene triggerato da "ReceiveMessage", relativo al metodo "SendAsync" nella Hub
+        connection.On<string, string>("ReceiveMessage", (user, message) =>
+        {
+
+            //crea il nuovo messaggio
+            UserMessages.Add(new UserMessage
+                {
+                    Username = user,
+                    Message = message,
+                    IsCurrentUser = user == CurrentUserName,
+                    DateSent = DateTime.Now
+                });
+
+            //aggiorna la pagina
+            InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        });
+
+        //avvia la connessione
+        await connection.StartAsync();
+    }
+
+    private async Task Send()
+    {
+        if (!string.IsNullOrEmpty(CurrentUserName) && !string.IsNullOrEmpty(MessageInput))
+        {
+            await connection.SendAsync("SendMessage", CurrentUserName, MessageInput);
+            IsUserReadonly = true;
+            MessageInput = string.Empty;   
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (connection is not null)
+        {
+            await connection.DisposeAsync();
+        }
+    }
+}
