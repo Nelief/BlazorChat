@@ -13,7 +13,6 @@ namespace BlazorChat2.Hubs
         public async Task SendMessageSelf(string userName, string message)
         {
             await Clients.Caller.SendAsync("ReceiveMessage", userName, message);
-
         }
 
         public async Task JoinRoom(string roomName, string userName)

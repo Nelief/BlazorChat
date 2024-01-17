@@ -32,6 +32,18 @@
                     </div>
                 </div>
             }
+            else if(message.IsSystemMessage)
+            {
+                <div class="row mb-3 d-flex justify-content-center">
+                    <div class="message-card card shadow px-0 ms-4 "> 
+                        <div class="card-body p-0 text-center">
+                            <ul class="list-group list-group-flush m-0">
+                                <li class="list-group-item">@message.Message</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            }
             else
             {
                 <div class="row mb-3 d-flex">
@@ -138,6 +150,7 @@
                 {
                     Username = user,
                     Message = message,
+                    IsSystemMessage = user == "System",
                     IsCurrentUser = user == CurrentUserName,
                     DateSent = DateTime.Now
                 });
